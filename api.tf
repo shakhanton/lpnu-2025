@@ -157,27 +157,27 @@ resource "aws_api_gateway_integration" "get_courses" {
   content_handling = "CONVERT_TO_TEXT"
 }
 
-# resource "aws_api_gateway_model" "post_course" {
-#   rest_api_id  = aws_api_gateway_rest_api.this.id
-#   name         = replace("${module.label_api.id}-PostCourse", "-", "")
-#   description  = "a JSON schema"
-#   content_type = "application/json"
+resource "aws_api_gateway_model" "post_course" {
+  rest_api_id  = aws_api_gateway_rest_api.this.id
+  name         = replace("${module.label_api.id}-PostCourse", "-", "")
+  description  = "a JSON schema"
+  content_type = "application/json"
 
-#   schema = <<EOF
-# {
-#   "$schema": "http://json-schema.org/schema#",
-#   "title": "CourseInputModel",
-#   "type": "object",
-#   "properties": {
-#     "title": {"type": "string"},
-#     "authorId": {"type": "string"},
-#     "length": {"type": "string"},
-#     "category": {"type": "string"}
-#   },
-#   "required": ["title", "authorId", "length", "category"]
-# }
-# EOF
-# }
+  schema = <<EOF
+{
+  "$schema": "http://json-schema.org/schema#",
+  "title": "CourseInputModel",
+  "type": "object",
+  "properties": {
+    "title": {"type": "string"},
+    "authorId": {"type": "string"},
+    "length": {"type": "string"},
+    "category": {"type": "string"}
+  },
+  "required": ["title", "authorId", "length", "category"]
+}
+EOF
+}
 
 resource "aws_api_gateway_request_validator" "this" {
   name                  = "validate_request_body"
