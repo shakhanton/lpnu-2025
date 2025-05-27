@@ -116,7 +116,7 @@ jobs:
 
       - name: Decrypt files with git-crypt
         run: |
-          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > git-crypt-key
+          echo "${{ secrets.GIT_CRYPT_KEY }}" > git-crypt-key
           git-crypt unlock git-crypt-key
           rm git-crypt-key
           ls -la *.tfvars || echo "No .tfvars files found"
