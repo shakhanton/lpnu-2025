@@ -1,4 +1,4 @@
-# main.tf
+# main.tf 
 module "table_courses" {
   source  = "./modules/dynamodb"
   context = module.label.context
