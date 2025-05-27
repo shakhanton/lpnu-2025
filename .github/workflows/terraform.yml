@@ -109,17 +109,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup git-crypt
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git-crypt
+          sudo apt-get install -y gnupg git-crypt
+        shell: bash
 
-      - name: Decrypt files with git-crypt
+      - name: Decrypt secrets using git-crypt
         run: |
-          echo "${{ secrets.GIT_CRYPT_KEY }}" > git-crypt-key
-          git-crypt unlock git-crypt-key
-          rm git-crypt-key
-          ls -la *.tfvars || echo "No .tfvars files found"
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | gpg --batch --yes --import
+        shell: bash
+
+      - name: Git Crypt unlock
+        run: git-crypt unlock
+        shell: bash
+
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
