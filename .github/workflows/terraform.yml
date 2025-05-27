@@ -16,6 +16,11 @@ on:
     paths:
       - '*.tf'
   workflow_dispatch:
+    inputs:
+      destroy_confirmation:
+        description: 'Type "destroy" to confirm destruction of resources'
+        required: false
+        type: string
 
 env:
   TF_VERSION: '1.11.2'
@@ -35,6 +40,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg git-crypt
+        shell: bash
+
+      - name: Decrypt secrets using git-crypt
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | gpg --batch --yes --import
+        shell: bash
+
+      - name: Git Crypt unlock
+        run: git-crypt unlock
+        shell: bash
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -63,7 +89,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: terraform plan -var-file=dev.tfvars -no-color -input=false
         continue-on-error: true
 
       - name: Comment PR
@@ -156,7 +182,7 @@ jobs:
   terraform-destroy:
     name: Terraform Destroy
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.destroy_confirmation == 'destroy'
     environment: development
     
     steps:
