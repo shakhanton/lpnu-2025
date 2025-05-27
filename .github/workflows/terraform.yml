@@ -128,7 +128,7 @@ jobs:
         run: terraform plan -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -var-file=dev.tfvars -auto-approve -input=false
 
   terraform-destroy:
     name: Terraform Destroy
